@@ -4,7 +4,7 @@ import http from "http";
 import { withTimeout, toUrl, dedupe } from "./utils.js";
 import fingerprints from "./signatures.js";
 
-const TIMEOUT_MS = 8000;
+const DEFAULT_TIMEOUT_MS = 8000;
 
 // fetch
 function fetchUrl(url, maxRedirects = 5) {
@@ -46,11 +46,11 @@ function fetchUrl(url, maxRedirects = 5) {
 }
 
 // tries https first, falls back to http if that fails
-async function fetchWithFallback(domain) {
+async function fetchWithFallback(domain, timeoutMs = DEFAULT_TIMEOUT_MS) {
   let lastErr;
   for (const protocol of ["https", "http"]) {
     try {
-      return await withTimeout(fetchUrl(toUrl(domain, protocol)), TIMEOUT_MS);
+      return await withTimeout(fetchUrl(toUrl(domain, protocol)), timeoutMs);
     } catch (err) {
       lastErr = err;
     }
@@ -178,10 +178,11 @@ function detect(buckets) {
 }
 
 // public API
-export async function scrapeDomain(domain) {
+export async function scrapeDomain(domain, options = {}) {
+  const timeoutMs = Number(options.timeoutMs) > 0 ? Number(options.timeoutMs) : DEFAULT_TIMEOUT_MS;
   let response;
   try {
-    response = await fetchWithFallback(domain);
+    response = await fetchWithFallback(domain, timeoutMs);
   } catch (err) {
     return { error: err.message };
   }
