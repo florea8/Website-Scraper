@@ -2,6 +2,8 @@
 
 A Node.js tool that identifies technologies used on websites by analysing the raw HTTP response — no headless browser required. Given a list of domains, it detects CMS platforms, JS frameworks, analytics tools, payment providers, CDN infrastructure and more, each with a concrete evidence snippet explaining *why* the detection was made.
 
+<img width="890" height="370" alt="image" src="https://github.com/user-attachments/assets/bf15929b-7b29-439d-9ed5-3e45d1605861" />
+
 ---
 
 ## How it works
