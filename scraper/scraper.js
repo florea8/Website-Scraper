@@ -64,12 +64,14 @@ function extractMeta(html) {
   return (html.match(/<meta[^>]+>/gi) || []).join(" ");
 }
 
-// collects src and href values from <script> and <link> tags
+// collects src values from <script src="..."> and href values from <link href="..."> only
 function extractScripts(html) {
   const srcs = [];
-  const re = /(?:src|href)=["']([^"']+)["']/gi;
+  const scriptRe = /<script[^>]+\bsrc=["']([^"']+)["'][^>]*>/gi;
+  const linkRe = /<link[^>]+\bhref=["']([^"']+)["'][^>]*>/gi;
   let m;
-  while ((m = re.exec(html)) !== null) srcs.push(m[1]);
+  while ((m = scriptRe.exec(html)) !== null) srcs.push(m[1]);
+  while ((m = linkRe.exec(html)) !== null) srcs.push(m[1]);
   return srcs;
 }
 
