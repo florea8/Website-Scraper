@@ -1,11 +1,12 @@
 {
   "name": "tech-detector",
   "version": "1.0.0",
-  "description": "CLI tool that detects technologies used by websites",
+  "description": "Website technology detector CLI and API",
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "start:api": "node server.js"
   },
   "engines": {
     "node": ">=18"
