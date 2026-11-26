@@ -193,7 +193,9 @@ export async function scrapeDomain(domain, options = {}) {
   } catch (err) {
     return { error: err.message };
   }
-  const { headers, body: html } = response;
+  const { statusCode, headers, body: html } = response;
+  // error pages (404, 403 challenge, 500...) and redirect loops are not the real site
+  if (statusCode >= 300) return { error: `HTTP ${statusCode}` };
   const buckets = {
     html,
     meta: extractMeta(html),
