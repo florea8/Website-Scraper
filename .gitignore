@@ -4,9 +4,10 @@ package-lock.json
 
 # Raw input data (not versioned)
 *.parquet
+scraper/domains.csv
 
 # Generated output
-scraper/output.csv
+scraper/results.csv
 
 # Vite build output
 client/dist/
