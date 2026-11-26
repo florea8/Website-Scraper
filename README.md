@@ -43,7 +43,7 @@ Website-Scraper/
 │   ├── server.js       # HTTP API server — POST /scan for single domain
 │   ├── scraper.js      # Core: fetch, extract buckets, run detection
 │   ├── signatures.js   # ~120 technology fingerprints
-│   ├── utils.js        # chunk, withTimeout, toUrl, dedupe
+│   ├── utils.js        # chunk, toUrl, dedupe
 │   ├── domains.csv     # Input file with domains to scan
 │   ├── results.csv     # Output file with scan results
 │   └── package.json    # Node.js dependencies and scripts

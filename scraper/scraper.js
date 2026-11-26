@@ -1,13 +1,14 @@
 
 import https from "https";
 import http from "http";
-import { withTimeout, toUrl, dedupe } from "./utils.js";
+import { toUrl, dedupe } from "./utils.js";
 import fingerprints from "./signatures.js";
 
 const DEFAULT_TIMEOUT_MS = 8000;
+const MAX_BODY_BYTES = 3 * 1024 * 1024; // enough for detection, protects memory from huge/endless responses
 
-// fetch
-function fetchUrl(url, maxRedirects = 5) {
+// fetch — `signal` aborts the request (and any redirects) when the time budget runs out
+function fetchUrl(url, signal, maxRedirects = 5) {
   return new Promise((resolve, reject) => {
     const lib = url.startsWith("https") ? https : http;
     const req = lib.get(
@@ -19,29 +20,32 @@ function fetchUrl(url, maxRedirects = 5) {
           "Accept-Language": "en-US,en;q=0.9",
         },
         rejectUnauthorized: false, // some small sites use self-signed certs
+        signal,
       },
       (res) => {
-        // follow redirects
+        // follow redirects (Location may be absolute, relative or protocol-relative)
         if ([301, 302, 303, 307, 308].includes(res.statusCode) && res.headers.location && maxRedirects > 0) {
           res.resume();
-          let next = res.headers.location;
-          if (!/^https?:\/\//i.test(next)) {
-            const base = new URL(url);
-            next = `${base.protocol}//${base.host}${next}`;
-          }
-          resolve(fetchUrl(next, maxRedirects - 1));
+          resolve(fetchUrl(new URL(res.headers.location, url).href, signal, maxRedirects - 1));
           return;
         }
         const chunks = [];
-        res.on("data", (c) => chunks.push(c));
-        res.on("end", () =>
-          resolve({ statusCode: res.statusCode, headers: res.headers, body: Buffer.concat(chunks).toString("utf-8") })
-        );
+        let size = 0;
+        const done = () =>
+          resolve({ statusCode: res.statusCode, headers: res.headers, body: Buffer.concat(chunks).toString("utf-8") });
+        res.on("data", (c) => {
+          chunks.push(c);
+          size += c.length;
+          if (size >= MAX_BODY_BYTES) {
+            done();
+            req.destroy();
+          }
+        });
+        res.on("end", done);
         res.on("error", reject);
       }
     );
     req.on("error", reject);
-    req.end();
   });
 }
 
@@ -49,10 +53,11 @@ function fetchUrl(url, maxRedirects = 5) {
 async function fetchWithFallback(domain, timeoutMs = DEFAULT_TIMEOUT_MS) {
   let lastErr;
   for (const protocol of ["https", "http"]) {
+    const signal = AbortSignal.timeout(timeoutMs);
     try {
-      return await withTimeout(fetchUrl(toUrl(domain, protocol)), timeoutMs);
+      return await fetchUrl(toUrl(domain, protocol), signal);
     } catch (err) {
-      lastErr = err;
+      lastErr = signal.aborted ? new Error(`Timed out after ${timeoutMs}ms`) : err;
     }
   }
   throw lastErr;

@@ -9,14 +9,6 @@ export function chunk(array, size) {
   return chunks;
 }
 
-// gives a promise a hard deadline — if it takes too long, we move on
-export function withTimeout(promise, ms) {
-  const timer = new Promise((_, reject) =>
-    setTimeout(() => reject(new Error(`Timed out after ${ms}ms`)), ms)
-  );
-  return Promise.race([promise, timer]);
-}
-
 // turns a bare domain like "example.com" into a proper URL
 export function toUrl(domain, protocol = "https") {
   domain = domain.trim().replace(/^https?:\/\//i, "");
