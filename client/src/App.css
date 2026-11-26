@@ -91,6 +91,10 @@ h1 {
 	background: #e2e8f0;
 }
 
+.export-btn {
+	margin-top: 14px;
+}
+
 /* ── Upload row ── */
 .upload-row {
 	display: flex;

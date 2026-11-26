@@ -55,6 +55,22 @@ async function scanWithConcurrency(domains, concurrency, onResult) {
   );
 }
 
+// same columns as the CLI's results.csv
+function downloadCsv(results) {
+  const cell = (v) => (/[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v);
+  const rows = results.map((r) =>
+    [r.domain, String(r.technologies.length), r.technologies.map((t) => t.name).join("|"), r.error || ""]
+      .map(cell)
+      .join(",")
+  );
+  const csv = ["domain,technologies_count,technologies,error", ...rows].join("\n");
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+  link.download = "results.csv";
+  link.click();
+  URL.revokeObjectURL(link.href);
+}
+
 export default function App() {
   const [domains, setDomains] = useState([]);
   const [fileName, setFileName] = useState("");
@@ -175,6 +191,12 @@ export default function App() {
               <span className="summary-label">Total technologies</span>
             </div>
           </div>
+        )}
+
+        {!isScanning && completed > 0 && (
+          <button className="btn btn--secondary export-btn" onClick={() => downloadCsv(results)}>
+            Export CSV
+          </button>
         )}
 
         {results.some(Boolean) && (
