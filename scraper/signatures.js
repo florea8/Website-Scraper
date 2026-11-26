@@ -9,25 +9,37 @@
 //               "header"      a specific HTTP response header
 //               "cookies"     Set-Cookie header names
 //   pattern:  regex to match against that part
+// a technology may have several rules; it is reported once, with the first match as proof
+
+// <meta name="generator" content="<value>..."> in any attribute order
+const generator = (value) => new RegExp(`<meta(?=[^>]*name=["']generator["'])[^>]*content=["']${value}`, "i");
+
 const signatures = [
 
   // -- CMS ------------------------------------------------------------------
   { name: "WordPress",          location: "html",      pattern: /\/wp-content\/|\/wp-includes\//i },
+  { name: "WordPress",          location: "meta",      pattern: generator("WordPress") },
   { name: "Drupal",             location: "html",      pattern: /\/sites\/default\/files\/|Drupal\.settings/i },
+  { name: "Drupal",             location: "meta",      pattern: generator("Drupal") },
   { name: "Joomla",             location: "html",      pattern: /\/components\/com_/i },
-  { name: "TYPO3",              location: "html",      pattern: /typo3/i },
-  { name: "Ghost",              location: "html",      pattern: /ghost\.org/i },
-  { name: "Wix",                location: "html",      pattern: /wix\.com/i },
-  { name: "Squarespace",        location: "html",      pattern: /squarespace\.com/i },
-  { name: "Webflow",            location: "html",      pattern: /webflow\.com/i },
-  { name: "HubSpot CMS",        location: "html",      pattern: /hubspot\.com/i },
-  { name: "Contentful",         location: "html",      pattern: /contentful/i },
+  { name: "Joomla",             location: "meta",      pattern: generator("Joomla") },
+  { name: "TYPO3",              location: "html",      pattern: /\/typo3conf\/|\/typo3temp\//i },
+  { name: "TYPO3",              location: "meta",      pattern: generator("TYPO3") },
+  { name: "Ghost",              location: "meta",      pattern: generator("Ghost") },
+  { name: "Wix",                location: "html",      pattern: /static\.wixstatic\.com|static\.parastorage\.com/i },
+  { name: "Wix",                location: "meta",      pattern: generator("Wix\\.com") },
+  { name: "Squarespace",        location: "html",      pattern: /static1\.squarespace\.com|assets\.squarespace\.com/i },
+  { name: "Webflow",            location: "html",      pattern: /data-wf-(?:page|site)=/i },
+  { name: "Webflow",            location: "meta",      pattern: generator("Webflow") },
+  { name: "HubSpot CMS",        location: "meta",      pattern: generator("HubSpot") },
+  { name: "Contentful",         location: "html",      pattern: /ctfassets\.net/i },
 
   // -- E-commerce ------------------------------------------------------------
-  { name: "WooCommerce",        location: "html",      pattern: /woocommerce/i },
+  { name: "WooCommerce",        location: "html",      pattern: /\/plugins\/woocommerce\/|woocommerce-no-js/i },
   { name: "Shopify",            location: "html",      pattern: /cdn\.shopify\.com/i },
   { name: "Magento",            location: "html",      pattern: /Magento_/i },
-  { name: "PrestaShop",         location: "html",      pattern: /prestashop/i },
+  { name: "PrestaShop",         location: "inline_js", pattern: /\bprestashop\s*=/i },
+  { name: "PrestaShop",         location: "meta",      pattern: generator("PrestaShop") },
   { name: "BigCommerce",        location: "html",      pattern: /bigcommerce\.com/i },
   { name: "OpenCart",           location: "html",      pattern: /route=common\/home/i },
 

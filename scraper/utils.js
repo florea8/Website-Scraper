@@ -15,13 +15,12 @@ export function toUrl(domain, protocol = "https") {
   return `${protocol}://${domain}`;
 }
 
-// removes duplicate detections — same tech can match from multiple spots on a page
+// keeps one detection per technology — several rules can match the same tech
 export function dedupe(techs) {
   const seen = new Set();
-  return techs.filter(({ name, proof }) => {
-    const key = `${name}|${proof}`;
-    if (seen.has(key)) return false;
-    seen.add(key);
+  return techs.filter(({ name }) => {
+    if (seen.has(name)) return false;
+    seen.add(name);
     return true;
   });
 }
