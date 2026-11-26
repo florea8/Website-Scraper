@@ -55,8 +55,7 @@ Website-Scraper/
     └── src/
         ├── main.jsx    # React entry point
         ├── App.jsx     # React UI — file upload, batch scan, live results
-        ├── App.css
-        └── index.css
+        └── App.css
 ```
 
 ---
