@@ -1,5 +1,6 @@
 import http from "http";
 import { scrapeDomain } from "./scraper.js";
+import { normalizeDomain } from "./utils.js";
 
 const PORT = Number(process.env.PORT || 3001);
 const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || "http://localhost:5173";
@@ -15,11 +16,6 @@ function sendJson(res, statusCode, payload) {
   setCorsHeaders(res);
   res.writeHead(statusCode, { "Content-Type": "application/json; charset=utf-8" });
   res.end(JSON.stringify(payload));
-}
-
-function normalizeDomain(input) {
-  if (!input || typeof input !== "string") return "";
-  return input.trim().replace(/^https?:\/\//i, "").replace(/\/$/, "");
 }
 
 function readJsonBody(req) {

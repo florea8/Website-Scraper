@@ -2,6 +2,7 @@ import fs from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
 import { scrapeDomain } from "./scraper.js";
+import { normalizeDomain } from "./utils.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -42,19 +43,6 @@ function parseArgs(argv) {
 	}
 
 	return args;
-}
-
-function normalizeDomain(value) {
-	if (!value) return "";
-	const cleaned = value.trim();
-	if (!cleaned) return "";
-
-	// Remove protocol and anything after first separator.
-	return cleaned
-		.replace(/^https?:\/\//i, "")
-		.split(/[\s,;]/)[0]
-		.replace(/\/$/, "")
-		.trim();
 }
 
 async function loadDomains(filePath) {
@@ -101,19 +89,11 @@ function createCsv(results) {
 }
 
 function printSummary(results, elapsedMs) {
-	let totalDetectedTechnologies = 0;
-
-	for (const result of results) {
-		for (const technology of result.technologies) {
-			totalDetectedTechnologies += 1;
-		}
-	}
-
 	const summary = {
 		scannedDomains: results.length,
 		successfulScans: results.filter((x) => x.success).length,
 		failedScans: results.filter((x) => !x.success).length,
-		totalDetectedTechnologies,
+		totalDetectedTechnologies: results.reduce((sum, x) => sum + x.technologies.length, 0),
 		elapsedMs,
 	};
 

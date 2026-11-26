@@ -1,12 +1,9 @@
 // utils.js — a handful of small helpers used throughout the scraper
 
-// breaks a big array into smaller chunks so we don't hammer too many sites at once
-export function chunk(array, size) {
-  const chunks = [];
-  for (let i = 0; i < array.length; i += size) {
-    chunks.push(array.slice(i, i + size));
-  }
-  return chunks;
+// "https://example.com/, extra" → "example.com": drops protocol, trailing slash and anything after a separator
+export function normalizeDomain(value) {
+  if (typeof value !== "string") return "";
+  return value.trim().replace(/^https?:\/\//i, "").split(/[\s,;]/)[0].replace(/\/$/, "");
 }
 
 // turns a bare domain like "example.com" into a proper URL
